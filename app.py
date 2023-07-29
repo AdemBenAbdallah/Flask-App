@@ -7,6 +7,19 @@ import dash_table
 from dash.dependencies import Input, Output, State
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 import secrets
+import sqlite3
+
+
+conn = sqlite3.connect('users.db')
+c = conn.cursor()
+
+c.execute('''CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL UNIQUE,
+                password TEXT NOT NULL)''')
+
+conn.commit()
+conn.close()
 
 server = Flask(__name__)
 server.secret_key = secrets.token_hex(16)
@@ -17,30 +30,23 @@ login_manager = LoginManager()
 login_manager.init_app(server)
 login_manager.login_view = 'login'
 
-
-USERS = {
-    'user1': {'password': 'password1'},
-    'user2': {'password': 'password2'},
-}
-
-
 class User(UserMixin):
     def __init__(self, user_id):
         self.id = user_id
 
     @staticmethod
     def get(username):
-        if username in USERS:
-            return User(username)
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+
+        c.execute("SELECT username, password FROM users WHERE username=?", (username,))
+        row = c.fetchone()
+        conn.close()
+
+        if row:
+            return User(row[0])
         return None
 
-
-@server.route('/')
-def home():
-    if current_user.is_authenticated:
-        return redirect('/')
-    else:
-        return redirect('/login')
 
 @server.route('/signup', methods=['GET', 'POST'])
 def signup():
@@ -51,13 +57,19 @@ def signup():
         username = request.form['username']
         password = request.form['password']
 
-        if username not in USERS:
-            USERS[username] = {'password': password}
-            user = User.get(username)
-            login_user(user)
-            return redirect('/')
+        conn = sqlite3.connect('users.db')
+        c = conn.cursor()
+
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password))
+        conn.commit()
+        conn.close()
+
+        user = User.get(username)
+        login_user(user)
+        return redirect('/')
 
     return render_template('signup.html')
+
 
 @server.route('/login', methods=['GET', 'POST'])
 def login():
@@ -70,7 +82,14 @@ def login():
 
         user = User.get(username)
         if user:
-            if USERS[username]['password'] == password:
+            conn = sqlite3.connect('users.db')
+            c = conn.cursor()
+
+            c.execute("SELECT password FROM users WHERE username=?", (username,))
+            row = c.fetchone()
+            conn.close()
+
+            if row[0] == password:
                 login_user(user)
                 return redirect('/')
             else:
@@ -117,6 +136,12 @@ app.layout = html.Div([
             style_table={'overflowX': 'auto'},
         )
 ])
+@server.route('/')
+def home():
+    if current_user.is_authenticated:
+        return redirect('/')
+    else:
+        return redirect('/login')
 
 @app.callback(
     Output('datatable-paging', 'data'),
