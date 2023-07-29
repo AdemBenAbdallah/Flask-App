@@ -27,15 +27,14 @@ This is a web application built using Flask and Dash frameworks. The app allows 
 ## File Structure
 
 - `app.py`: The main Python script containing the Flask-Dash app and routes.
-- `data_nyx.xlsx`: Sample Excel file containing the data for the Dash table.
+- `data.csv`: Sample Excel file containing the data for the Dash table.
 - `login.html` and `signup.html`: HTML templates for the login and signup pages.
 - `base.html`: Base HTML template containing the layout for the app.
-- `requirements.txt`: List of required Python packages.
 
 ## Author
 
-Created by [Your Name] for [Your Company/Organization].
+Created by Adem Ben Abdallah for Nyx Data.
 
 ## Contact
 
-For any inquiries or feedback, please email us at tech@nyxbyte.com.
+For any inquiries or feedback, please email us at adembenabdallah.contact@gmail.com.
