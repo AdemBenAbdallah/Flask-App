@@ -1,0 +1,22 @@
+# Ignore virtual environment files
+venv/
+
+# Ignore Python byte code files
+*.pyc
+
+# Ignore cache files
+__pycache__/
+
+# Ignore logs and other temporary files
+*.log
+*.swp
+*.swo
+*.tmp
+*.pid
+
+# Ignore environment specific files
+*.env
+
+# Ignore any local configuration or sensitive information files
+config.ini
+secrets.ini
